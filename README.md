@@ -1,5 +1,8 @@
 # 인천온누리교회 소년부 설교 아카이브
 
+**웹사이트: https://tjdals-sudo.github.io/sermon-archive/**
+**저장소: https://github.com/tjdals-sudo/sermon-archive**
+
 주일 설교 원고와 PPT를 올리면 날짜별로 정리되어 공개되는 웹사이트입니다.
 
 ---
@@ -27,22 +30,14 @@ cd ~/sermon-archive && npm install       # 필요한 부품 내려받기
 
 ## 🚀 웹사이트 배포 (처음 한 번)
 
-1. 깃헙에서 저장소를 새로 만듭니다. (이름 예: `sermon-archive`, **Public**)
-2. 터미널에서:
-   ```bash
-   cd ~/sermon-archive
-   git add -A && git commit -m "설교 아카이브 시작"
-   git branch -M main
-   git remote add origin https://github.com/<내아이디>/sermon-archive.git
-   git push -u origin main
-   ```
-3. 깃헙 저장소 → **Settings → Pages → Source를 `GitHub Actions`** 로 선택합니다.
-4. `site.config.mjs` 를 열어 **`url`** 과 **`base`** 를 내 주소로 고칩니다.
-   ```js
-   url:  'https://<내아이디>.github.io/sermon-archive',
-   base: '/sermon-archive',
-   ```
-   (카카오톡 공유 미리보기가 이 주소를 씁니다. 꼭 고쳐야 합니다.)
+**이미 배포가 끝났습니다.** 아래는 다른 컴퓨터에서 이어받을 때만 필요합니다.
+
+```bash
+git clone https://github.com/tjdals-sudo/sermon-archive.git
+cd sermon-archive && npm install
+```
+
+게시하면 자동으로 배포되므로, 평소에는 아무것도 하지 않아도 됩니다.
 
 ---
 
