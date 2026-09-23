@@ -211,3 +211,41 @@ footer.site-footer {
   box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* 검색 */
+.search {
+  position: relative; display: flex; align-items: center;
+  margin: 20px 0 4px;
+}
+.search-icon {
+  position: absolute; left: 15px; font-size: .95em; opacity: .55; pointer-events: none;
+}
+.search input {
+  width: 100%; min-height: 50px;
+  padding: 12px 46px 12px 42px;
+  font: inherit; font-size: 1em; color: var(--text);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 999px; -webkit-appearance: none;
+}
+.search input::placeholder { color: var(--text-soft); opacity: .85; }
+.search input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+.search input::-webkit-search-cancel-button { display: none; }
+.search button {
+  position: absolute; right: 8px;
+  width: 34px; height: 34px; border-radius: 999px; cursor: pointer;
+  border: 0; background: var(--surface-2); color: var(--text-soft);
+  font-size: .85em; line-height: 1;
+}
+.search-count {
+  margin: 10px 2px 0; font-size: .86em; color: var(--text-soft);
+}
+.card-hit {
+  margin: 8px 0 0; font-size: .86em; color: var(--text-soft); line-height: 1.6;
+}
+.card-hit mark {
+  background: var(--accent-bg); color: var(--accent);
+  font-weight: 600; padding: 0 2px; border-radius: 3px;
+}
