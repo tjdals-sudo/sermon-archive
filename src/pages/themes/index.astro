@@ -1,0 +1,42 @@
+---
+import Base from '../../layouts/Base.astro';
+import { sermons } from '../../lib/sermons.mjs';
+import months from '../../data-months.json';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const rows = Object.entries(months)
+  .sort((a, b) => b[0].localeCompare(a[0]))
+  .map(([key, v]) => ({
+    key,
+    month: Number(key.slice(5, 7)),
+    ...v,
+    list: sermons.filter((s) => s.date.startsWith(key)),
+  }));
+---
+<Base title="월별 설교 주제" description="한 달에 하나씩, 그달에 나눈 말씀의 주제입니다.">
+  <a class="back-btn" href={base + '/'}>← 홈으로 돌아가기</a>
+  <h1 class="page-title">월별 설교 주제</h1>
+  <p class="page-note">한 달에 하나씩 주제를 정해 말씀을 나눕니다.</p>
+
+  {rows.map((r) => (
+    <section class="month-block">
+      <div class="month-head">
+        <span class="month-num">{r.month}월</span>
+        <b class="month-theme">{r.theme}</b>
+      </div>
+      {r.detail && <p class="month-detail">{r.detail}</p>}
+      <ul class="month-list">
+        {r.list.map((s) => (
+          <li>
+            <a href={`${base}/sermons/${s.slug}/`}>
+              <span class="month-date">{Number(s.date.slice(8, 10))}일</span>
+              <span class="month-title">{s.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+
+  <a class="back-btn wide" href={base + '/'}>🏠 홈으로 돌아가기</a>
+</Base>

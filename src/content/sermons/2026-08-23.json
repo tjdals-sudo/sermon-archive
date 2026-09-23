@@ -45,7 +45,11 @@
   },
   "pptAccess": "view",
   "series": null,
-  "tags": [],
+  "tags": [
+    "제자",
+    "사랑",
+    "전도"
+  ],
   "youtube": null,
   "status": "published",
   "publishedAt": "2026-09-23T14:07:56.145Z"

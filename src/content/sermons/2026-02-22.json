@@ -47,7 +47,10 @@
   },
   "pptAccess": "view",
   "series": null,
-  "tags": [],
+  "tags": [
+    "정체성",
+    "용서"
+  ],
   "youtube": null,
   "status": "published",
   "publishedAt": "2026-09-23T14:07:14.283Z"

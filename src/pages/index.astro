@@ -1,181 +1,61 @@
 ---
 import Base from '../layouts/Base.astro';
-import { sermons, years, formatDate } from '../lib/sermons.mjs';
+import { sermons, formatDate } from '../lib/sermons.mjs';
+import { site } from '../../site.config.mjs';
+import months from '../data-months.json';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-// 설교자가 거의 한 분이면 카드마다 이름을 반복하지 않습니다
-const counts = {};
-for (const s of sermons) if (s.preacher) counts[s.preacher] = (counts[s.preacher] ?? 0) + 1;
-const mainPreacher = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
-
-// 설교가 실제로 있는 달만 버튼으로 보여 줍니다
-const monthsByYear = {};
-for (const s of sermons) {
-  const [y, m] = s.date.split('-');
-  (monthsByYear[y] ??= new Set()).add(String(Number(m)));
-}
+const latest = sermons[0];
+const d = latest ? formatDate(latest.date) : null;
+const monthCount = Object.keys(months).length;
 ---
 <Base>
-  {sermons.length === 0 ? (
-    <p class="empty">아직 등록된 설교가 없습니다.</p>
-  ) : (
-    <>
-      <div class="search">
-        <span class="search-icon" aria-hidden="true">🔍</span>
-        <input
-          type="search" id="q" autocomplete="off" enterkeyhint="search"
-          placeholder="제목·본문·내용 검색 (예: 기도, 요한복음, ㅂㅇ)"
-          aria-label="설교 검색"
-        />
-        <button type="button" id="qClear" aria-label="검색어 지우기" hidden>✕</button>
-      </div>
-      <p class="search-count" id="qCount" hidden></p>
+  <section class="hero">
+    <p class="hero-sub">{site.churchName}</p>
+    <h1 class="hero-title">{site.year}년<br />설교 아카이브</h1>
+    <p class="hero-note">지난 주일 말씀을 언제든 다시 볼 수 있습니다.</p>
+  </section>
 
-      <div id="browseFilters">
-        {years.length > 1 && (
-          <div class="filters" id="yearFilter">
-            {years.map((y, i) => (
-              <button class="chip" data-year={y} aria-pressed={i === 0 ? 'true' : 'false'}>{y}년</button>
-            ))}
-          </div>
-        )}
-        <div class="filters" id="monthFilter">
-          <button class="chip" data-month="all" aria-pressed="true">전체</button>
-          {[...(monthsByYear[years[0]] ?? [])]
-            .sort((a, b) => Number(a) - Number(b))
-            .map((m) => <button class="chip" data-month={m}>{m}월</button>)}
+  <nav class="menu">
+    <a class="menu-item" href={base + '/sermons/'}>
+      <span class="menu-icon" aria-hidden="true">📖</span>
+      <span class="menu-text">
+        <b>설교 보기</b>
+        <small>{sermons.length}편 · 날짜·주제별로 찾기</small>
+      </span>
+      <span class="menu-go" aria-hidden="true">›</span>
+    </a>
+    <a class="menu-item" href={base + '/verses/'}>
+      <span class="menu-icon" aria-hidden="true">✍️</span>
+      <span class="menu-text">
+        <b>월별 암송 말씀</b>
+        <small>이 달에 외울 말씀</small>
+      </span>
+      <span class="menu-go" aria-hidden="true">›</span>
+    </a>
+    <a class="menu-item" href={base + '/themes/'}>
+      <span class="menu-icon" aria-hidden="true">🗓️</span>
+      <span class="menu-text">
+        <b>월별 설교 주제</b>
+        <small>{monthCount}개월 · 한 달에 하나씩</small>
+      </span>
+      <span class="menu-go" aria-hidden="true">›</span>
+    </a>
+  </nav>
+
+  {latest && (
+    <section class="latest">
+      <h2 class="latest-label">가장 최근 설교</h2>
+      <a class="card" href={`${base}/sermons/${latest.slug}/`}>
+        <div class="card-body">
+          <div class="card-date">{d.full}</div>
+          <h3 class="card-title">{latest.title}</h3>
+          <div class="card-meta">{latest.scriptureRef}</div>
         </div>
-      </div>
-
-      <ul class="card-list" id="list">
-        {sermons.map((s) => {
-          const d = formatDate(s.date);
-          const body = [s.summary, ...(s.keyPoints ?? [])].filter(Boolean).join(' ');
-          const haystack = [s.title, s.scriptureRef, s.preacher, body].filter(Boolean).join(' ');
-          return (
-            <li data-year={d.y} data-month={d.m} data-search={haystack} data-title={s.title} data-body={body}>
-              <a class="card" href={`${base}/sermons/${s.slug}/`}>
-                <div class="card-body">
-                  <div class="card-date">{d.short} {d.full.includes('(일)') ? '주일' : ''}</div>
-                  <h2 class="card-title">{s.title}</h2>
-                  <div class="card-meta">
-                    {s.scriptureRef}
-                    {s.preacher && s.preacher !== mainPreacher && <><span class="dot">·</span>{s.preacher}</>}
-                  </div>
-                  <p class="card-hit" hidden></p>
-                </div>
-                {s.files?.thumb && (
-                  <img class="card-thumb" src={base + s.files.thumb} alt="" loading="lazy" decoding="async" />
-                )}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-      <p class="empty" id="noResult" hidden>이 달에는 등록된 설교가 없습니다.</p>
-      {mainPreacher && <p class="note" style="text-align:center;padding-bottom:40px">설교 · {mainPreacher}</p>}
-    </>
+        {latest.files?.thumb && (
+          <img class="card-thumb" src={base + latest.files.thumb} alt="" loading="lazy" />
+        )}
+      </a>
+    </section>
   )}
 </Base>
-
-<script is:inline>
-  const items = [...document.querySelectorAll('#list > li')];
-  if (items.length) {
-    const yearBtns = [...document.querySelectorAll('#yearFilter .chip')];
-    const monthBtns = [...document.querySelectorAll('#monthFilter .chip')];
-    const input = document.getElementById('q');
-    const clearBtn = document.getElementById('qClear');
-    const countEl = document.getElementById('qCount');
-    const browse = document.getElementById('browseFilters');
-    const noResult = document.getElementById('noResult');
-
-    let year = yearBtns[0]?.dataset.year ?? items[0].dataset.year;
-    let month = 'all';
-
-    // 초성 검색 (ㅂㅇ → 복의 자녀 …)
-    const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
-    const toCho = (s) => [...s].map((ch) => {
-      const code = ch.charCodeAt(0) - 0xac00;
-      return code >= 0 && code <= 11171 ? CHO[Math.floor(code / 588)] : ch;
-    }).join('');
-    const isChoOnly = (s) => /^[ㄱ-ㅎ\s]+$/.test(s);
-
-    // 검색 대상 문자열을 미리 만들어 둡니다
-    for (const li of items) {
-      const text = (li.dataset.search || '').toLowerCase();
-      li._text = text;
-      // 초성 검색은 제목에만 적용합니다 (요약까지 뒤지면 거의 다 걸립니다)
-      li._cho = toCho((li.dataset.title || '').toLowerCase());
-      li._hit = li.querySelector('.card-hit');
-    }
-
-    const esc = (s) => s.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
-
-    // 요약에서 검색어 주변을 잘라 보여 줍니다
-    function snippet(li, term) {
-      const sum = li.dataset.body || '';
-      const i = sum.toLowerCase().indexOf(term);
-      if (i < 0) return '';
-      const from = Math.max(0, i - 25);
-      const head = (from > 0 ? '…' : '') + sum.slice(from, i);
-      const tail = sum.slice(i + term.length, i + term.length + 45);
-      return esc(head) + '<mark>' + esc(sum.slice(i, i + term.length)) + '</mark>' + esc(tail) + '…';
-    }
-
-    function run() {
-      const raw = input.value.trim();
-      const searching = raw.length > 0;
-      clearBtn.hidden = !searching;
-      browse.hidden = searching;
-
-      let shown = 0;
-      if (searching) {
-        const terms = raw.toLowerCase().split(/\s+/).filter(Boolean);
-        const cho = isChoOnly(raw);
-        for (const li of items) {
-          const hay = cho ? li._cho : li._text;
-          const ok = terms.every((t) => hay.includes(t));
-          li.hidden = !ok;
-          if (ok) {
-            shown++;
-            const s = cho ? '' : snippet(li, terms[0]);
-            li._hit.hidden = !s;
-            if (s) li._hit.innerHTML = s;
-          }
-        }
-        countEl.hidden = false;
-        countEl.textContent = shown > 0 ? `검색 결과 ${shown}편` : '';
-        noResult.hidden = shown !== 0;
-        noResult.textContent = `'${raw}' 에 해당하는 설교가 없습니다.`;
-      } else {
-        countEl.hidden = true;
-        for (const li of items) {
-          const ok = li.dataset.year === year && (month === 'all' || li.dataset.month === month);
-          li.hidden = !ok;
-          li._hit.hidden = true;
-          if (ok) shown++;
-        }
-        noResult.hidden = shown !== 0;
-        noResult.textContent = '이 달에는 등록된 설교가 없습니다.';
-      }
-    }
-
-    function select(btns, attr, value) {
-      for (const b of btns) b.setAttribute('aria-pressed', String(b.dataset[attr] === value));
-    }
-    yearBtns.forEach((b) => b.addEventListener('click', () => {
-      year = b.dataset.year; select(yearBtns, 'year', year);
-      month = 'all'; select(monthBtns, 'month', 'all'); run();
-    }));
-    monthBtns.forEach((b) => b.addEventListener('click', () => {
-      month = b.dataset.month; select(monthBtns, 'month', month); run();
-    }));
-    input.addEventListener('input', run);
-    clearBtn.addEventListener('click', () => { input.value = ''; input.focus(); run(); });
-
-    // 주소에 ?q=기도 를 붙이면 바로 검색된 상태로 열립니다
-    const fromUrl = new URLSearchParams(location.search).get('q');
-    if (fromUrl) input.value = fromUrl;
-    run();
-  }
-</script>

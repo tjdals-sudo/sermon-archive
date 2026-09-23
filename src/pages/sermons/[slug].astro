@@ -24,7 +24,7 @@ const canDownload = s.pptAccess === 'download' && pdf;
   ogImage={s.files?.thumb}
   ogType="article"
 >
-  <a class="back" href={base + '/'}>← 설교 목록</a>
+  <a class="back-btn" href={base + '/sermons/'}>← 설교 목록으로</a>
 
   <header class="sermon-head">
     <div class="sermon-date">{d.full}</div>
@@ -35,6 +35,13 @@ const canDownload = s.pptAccess === 'download' && pdf;
         : <span class="scripture">📖 {s.scriptureRef}</span>
     )}
     {s.preacher && <div class="preacher">{s.preacher}</div>}
+    {s.tags?.length > 0 && (
+      <div class="tags">
+        {s.tags.map((t) => (
+          <a class="tag" href={`${base}/sermons/?tag=${encodeURIComponent(t)}`}># {t}</a>
+        ))}
+      </div>
+    )}
   </header>
 
   {s.summary && (
@@ -88,6 +95,11 @@ const canDownload = s.pptAccess === 'download' && pdf;
       위 본문 구절 버튼을 눌러 성경 사이트에서 읽어 주세요.
     </p>
   </section>
+
+  <div class="home-row">
+    <a class="back-btn wide" href={base + '/sermons/'}>← 설교 목록으로</a>
+    <a class="back-btn wide home" href={base + '/'}>🏠 홈으로 돌아가기</a>
+  </div>
 
   <button id="toTop" class="to-top" aria-label="맨 위로" hidden>↑</button>
   <script is:inline>

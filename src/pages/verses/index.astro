@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import months from '../../data-months.json';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const rows = Object.entries(months)
+  .sort((a, b) => b[0].localeCompare(a[0]))
+  .map(([key, v]) => ({ key, month: Number(key.slice(5, 7)), ...v }));
+const hasAny = rows.some((r) => r.verse?.ref);
+---
+<Base title="월별 암송 말씀" description="그달에 함께 외우는 말씀입니다.">
+  <a class="back-btn" href={base + '/'}>← 홈으로 돌아가기</a>
+  <h1 class="page-title">월별 암송 말씀</h1>
+  <p class="page-note">그달에 소년부가 함께 외우는 말씀입니다.</p>
+
+  {!hasAny && (
+    <p class="notice">
+      아직 암송 말씀이 등록되지 않았습니다.<br />
+      <code>src/data-months.json</code> 의 <code>verse</code> 항목에 적으면 이 화면에 나옵니다.
+    </p>
+  )}
+
+  {rows.map((r) => (
+    <section class="verse-block">
+      <div class="month-head">
+        <span class="month-num">{r.month}월</span>
+        {r.theme && <b class="month-theme">{r.theme}</b>}
+      </div>
+      {r.verse?.ref ? (
+        <>
+          {r.verse.text && <p class="verse-text">“{r.verse.text}”</p>}
+          {r.verse.url
+            ? <a class="scripture" href={r.verse.url} target="_blank" rel="noopener">📖 {r.verse.ref} 보기 ↗</a>
+            : <span class="scripture">📖 {r.verse.ref}</span>}
+        </>
+      ) : (
+        <p class="verse-empty">준비 중입니다.</p>
+      )}
+    </section>
+  ))}
+
+  <a class="back-btn wide" href={base + '/'}>🏠 홈으로 돌아가기</a>
+</Base>
