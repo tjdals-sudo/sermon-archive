@@ -5,39 +5,43 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const rows = Object.entries(months)
   .sort((a, b) => b[0].localeCompare(a[0]))
-  .map(([key, v]) => ({ key, month: Number(key.slice(5, 7)), ...v }));
-const hasAny = rows.some((r) => r.verse?.ref);
+  .map(([key, v]) => ({ key, month: Number(key.slice(5, 7)), ...v }))
+  .filter((r) => r.verse?.ref);
+
+// 이번 달 것을 맨 위에 펼쳐 둡니다
+const thisMonth = new Date().toISOString().slice(0, 7);
 ---
-<Base title="월별 암송 말씀" description="그달에 함께 외우는 말씀입니다.">
+<Base
+  title="월별 암송 말씀"
+  description="소년부가 달마다 함께 외우는 말씀입니다."
+  ogImage={rows[0]?.verse?.image}
+>
   <a class="back-btn" href={base + '/'}>← 홈으로 돌아가기</a>
   <h1 class="page-title">월별 암송 말씀</h1>
-  <p class="page-note">그달에 소년부가 함께 외우는 말씀입니다.</p>
-
-  {!hasAny && (
-    <p class="notice">
-      아직 암송 말씀이 등록되지 않았습니다.<br />
-      <code>src/data-months.json</code> 의 <code>verse</code> 항목에 적으면 이 화면에 나옵니다.
-    </p>
-  )}
+  <p class="page-note">달마다 소년부가 함께 외우는 말씀입니다. 말씀 카드를 눌러 크게 볼 수 있습니다.</p>
 
   {rows.map((r) => (
-    <section class="verse-block">
+    <section class="verse-block" id={`m${r.month}`}>
       <div class="month-head">
         <span class="month-num">{r.month}월</span>
         {r.theme && <b class="month-theme">{r.theme}</b>}
+        {r.key === thisMonth && <span class="badge-now">이번 달</span>}
       </div>
-      {r.verse?.ref ? (
-        <>
-          {r.verse.text && <p class="verse-text">“{r.verse.text}”</p>}
-          {r.verse.url
-            ? <a class="scripture" href={r.verse.url} target="_blank" rel="noopener">📖 {r.verse.ref} 보기 ↗</a>
-            : <span class="scripture">📖 {r.verse.ref}</span>}
-        </>
-      ) : (
-        <p class="verse-empty">준비 중입니다.</p>
+
+      {r.verse.image && (
+        <a class="verse-card" href={base + r.verse.image} target="_blank" rel="noopener">
+          <img src={base + r.verse.image} alt={`${r.month}월 암송 말씀 카드 — ${r.verse.text}`}
+               loading="lazy" decoding="async" />
+        </a>
       )}
+
+      <p class="verse-text">{r.verse.text}</p>
+
+      {r.verse.url
+        ? <a class="scripture" href={r.verse.url} target="_blank" rel="noopener">📖 {r.verse.ref} 보기 ↗</a>
+        : <span class="scripture">📖 {r.verse.ref}</span>}
     </section>
   ))}
 
-  <a class="back-btn wide" href={base + '/'}>🏠 홈으로 돌아가기</a>
+  <a class="back-btn wide home" href={base + '/'}>🏠 홈으로 돌아가기</a>
 </Base>
