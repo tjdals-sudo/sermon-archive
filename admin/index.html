@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>설교 올리기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+<style>
+  :root{--bg:#faf7f2;--surface:#fff;--line:#e4dbcd;--text:#2b2622;--soft:#6b6157;
+        --accent:#8a5a35;--accent-bg:#f4ebe1;--warn:#a1442f;--warn-bg:#fbeeea;--ok:#2f6b45;}
+  @media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#1b1917;--surface:#242019;--line:#3a342b;
+        --text:#ede7de;--soft:#a89e91;--accent:#d9a273;--accent-bg:#332a22;--warn:#e8917a;--warn-bg:#3a2620;--ok:#8fc7a5;}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;
+       font-size:16px;line-height:1.7;word-break:keep-all}
+  .wrap{max-width:780px;margin:0 auto;padding:28px 18px 80px}
+  h1{font-size:1.5em;letter-spacing:-.03em;margin:0 0 4px}
+  .sub{color:var(--soft);font-size:.92em;margin:0 0 26px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+  #drop{border:2px dashed var(--line);border-radius:16px;padding:52px 20px;text-align:center;color:var(--soft);
+        cursor:pointer;background:var(--surface);transition:.15s}
+  #drop.over{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+  #drop b{display:block;font-size:1.15em;color:var(--text);margin-bottom:6px}
+  label{display:block;font-weight:600;font-size:.88em;margin:16px 0 6px}
+  input[type=text],input[type=date],textarea,select{
+    width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;
+    background:var(--bg);color:var(--text);font:inherit;font-size:.96em}
+  textarea{line-height:1.7;resize:vertical}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:160px}
+  .btn{border:0;border-radius:999px;padding:13px 22px;font:inherit;font-weight:600;cursor:pointer;
+       background:var(--accent);color:#fff;min-height:46px}
+  .btn.ghost{background:var(--surface);color:var(--text);border:1px solid var(--line)}
+  .btn.small{padding:8px 15px;min-height:38px;font-size:.88em}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;position:sticky;bottom:0;
+          background:linear-gradient(transparent,var(--bg) 30%);padding:16px 0 4px}
+  .warn{background:var(--warn-bg);border:1px solid var(--warn);border-radius:12px;padding:16px;margin-bottom:16px}
+  .warn h3{margin:0 0 8px;font-size:1em;color:var(--warn)}
+  .hit{font-size:.88em;padding:7px 0;border-top:1px dashed var(--line)}
+  .hit b{color:var(--warn)}
+  .hit span{color:var(--soft)}
+  .radio{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .radio label{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;
+               padding:9px 15px;margin:0;font-weight:500;font-size:.92em;cursor:pointer;background:var(--bg)}
+  .radio input{accent-color:var(--accent)}
+  .kp{display:flex;gap:8px;margin-bottom:8px}
+  .kp input{flex:1}
+  .kp button{border:1px solid var(--line);background:var(--bg);color:var(--soft);border-radius:8px;width:40px;cursor:pointer}
+  .muted{color:var(--soft);font-size:.86em}
+  .step{display:inline-block;background:var(--accent-bg);color:var(--accent);border-radius:999px;
+        padding:2px 11px;font-size:.8em;font-weight:700;margin-bottom:10px}
+  #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--text);color:var(--bg);
+         padding:13px 22px;border-radius:999px;font-size:.92em;opacity:0;transition:.25s;pointer-events:none;z-index:9}
+  #toast.show{opacity:1}
+  .hidden{display:none}
+  .draftitem{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:.92em}
+  .draftitem span{flex:1}
+  iframe.prev{width:100%;height:300px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>설교 올리기</h1>
+  <p class="sub">원고와 PPT를 끌어다 놓으면 자동으로 정리됩니다. 확인하고 게시하면 끝입니다.</p>
+
+  <!-- 1단계: 업로드 -->
+  <div id="stepUpload">
+    <div id="drop">
+      <b>여기에 원고와 PPT를 끌어다 놓으세요</b>
+      원고 .docx · 발표자료 .pptx (한 번에 둘 다 놓아도 됩니다)
+      <input type="file" id="picker" multiple accept=".docx,.pptx,.ppt" class="hidden" />
+    </div>
+    <div class="card hidden" id="draftsCard">
+      <b>작성 중이던 설교</b>
+      <div id="draftList"></div>
+    </div>
+    <p class="muted" id="envNote"></p>
+  </div>
+
+  <!-- 2단계: 검토 -->
+  <div id="stepReview" class="hidden">
+    <span class="step">2단계 · 검토</span>
+
+    <div id="privacyBox"></div>
+
+    <div class="card">
+      <div class="row">
+        <div><label>설교 날짜</label><input type="date" id="f_date" /></div>
+        <div><label>설교자</label><input type="text" id="f_preacher" placeholder="예: 김OO 전도사" /></div>
+      </div>
+      <label>설교 제목</label>
+      <input type="text" id="f_title" placeholder="설교 제목" />
+      <div class="row">
+        <div><label>본문 구절</label><input type="text" id="f_ref" placeholder="예: 요한복음 3:16-21" /></div>
+        <div><label>성경 링크 <span class="muted">(자동)</span></label><input type="text" id="f_url" /></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <b>AI 요약 (선택)</b>
+      <p class="muted">① 프롬프트를 복사해 Claude에 붙여넣고 ② 나온 답을 아래 칸에 붙여넣으면 요약·핵심포인트가 자동으로 채워집니다.</p>
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn ghost small" id="btnCopyPrompt">① 프롬프트 복사</button>
+      </div>
+      <textarea id="aiPaste" rows="3" placeholder="② Claude가 준 답을 여기에 붙여넣으세요"></textarea>
+      <button class="btn ghost small" id="btnApplyAi" style="margin-top:8px">결과 반영하기</button>
+    </div>
+
+    <div class="card">
+      <label>요약 <span class="muted">(성도들이 가장 먼저 보는 3~4문장)</span></label>
+      <textarea id="f_summary" rows="4"></textarea>
+      <label>핵심 포인트</label>
+      <div id="kpList"></div>
+      <button class="btn ghost small" id="btnAddKp">+ 포인트 추가</button>
+    </div>
+
+    <div class="card">
+      <label>PPT 공개 범위 <span class="muted">(찬양 가사·사진 저작권 주의)</span></label>
+      <div class="radio">
+        <label><input type="radio" name="ppt" value="download" /> 다운로드 허용</label>
+        <label><input type="radio" name="ppt" value="view" /> 보기만 허용</label>
+        <label><input type="radio" name="ppt" value="private" /> 비공개</label>
+      </div>
+      <div id="pdfPreview"></div>
+    </div>
+
+    <details class="card">
+      <summary style="cursor:pointer;font-weight:600">원고 보기·수정 <span class="muted">(웹에는 공개되지 않습니다)</span></summary>
+      <textarea id="f_manuscript" rows="18" style="margin-top:12px"></textarea>
+    </details>
+
+    <div class="btnbar">
+      <button class="btn ghost" id="btnSave">임시저장</button>
+      <button class="btn" id="btnPublish">게시하기</button>
+      <button class="btn ghost" id="btnCancel">취소</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let draft = null;
+
+const toast = (msg, ms = 2600) => {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), ms);
+};
+const api = async (url, opt) => {
+  const r = await fetch(url, opt);
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || '오류가 발생했습니다');
+  return d;
+};
+const fileToBase64 = (file) => new Promise((res, rej) => {
+  const fr = new FileReader();
+  fr.onload = () => res(fr.result.split(',')[1]);
+  fr.onerror = rej;
+  fr.readAsDataURL(file);
+});
+
+// ── 업로드 ─────────────────────────────────────────
+const drop = $('#drop'), picker = $('#picker');
+drop.addEventListener('click', () => picker.click());
+picker.addEventListener('change', () => handleFiles([...picker.files]));
+['dragenter','dragover'].forEach(e => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(e => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', (ev) => handleFiles([...ev.dataTransfer.files]));
+
+async function handleFiles(files) {
+  if (!files.length) return;
+  const docx = files.find(f => /\.docx?$/i.test(f.name));
+  const ppt  = files.find(f => /\.pptx?$/i.test(f.name));
+  if (!docx && !ppt) return toast('docx 또는 pptx 파일을 올려주세요');
+
+  drop.innerHTML = '<b>정리하는 중입니다…</b>PPT 변환에 10~30초쯤 걸립니다';
+  try {
+    const body = {};
+    if (docx) body.docx = { name: docx.name, data: await fileToBase64(docx) };
+    if (ppt)  body.ppt  = { name: ppt.name,  data: await fileToBase64(ppt) };
+    const d = await api('/api/analyze', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+    });
+    openReview(d);
+    if (d.notes?.length) toast(d.notes[0], 5000);
+  } catch (e) {
+    toast(e.message, 5000);
+    drop.innerHTML = '<b>여기에 원고와 PPT를 끌어다 놓으세요</b>원고 .docx · 발표자료 .pptx';
+  }
+}
+
+// ── 검토 화면 ───────────────────────────────────────
+function openReview(d) {
+  draft = d;
+  $('#stepUpload').classList.add('hidden');
+  $('#stepReview').classList.remove('hidden');
+  $('#f_date').value = d.date || '';
+  $('#f_title').value = d.title || '';
+  $('#f_preacher').value = d.preacher || '';
+  $('#f_ref').value = d.scriptureRef || '';
+  $('#f_url').value = d.scriptureUrl || '';
+  $('#f_summary').value = d.summary || '';
+  $('#f_manuscript').value = d.manuscript || '';
+  renderKeyPoints(d.keyPoints || []);
+  document.querySelectorAll('input[name=ppt]').forEach(r => r.checked = r.value === (d.pptAccess || 'view'));
+  $('#pdfPreview').innerHTML = d.files?.pdf
+    ? `<iframe class="prev" src="/draft/${d.id}/${d.files.pdf}" style="margin-top:12px"></iframe>`
+    : '<p class="muted">PPT 미리보기가 없습니다.</p>';
+  renderPrivacy(d.privacy || []);
+  scrollTo(0, 0);
+}
+
+function renderPrivacy(hits) {
+  const box = $('#privacyBox');
+  if (!hits.length) { box.innerHTML = ''; return; }
+  box.innerHTML = `
+    <div class="warn">
+      <h3>⚠ 실명·개인정보로 보이는 표현이 ${hits.length}곳 있습니다</h3>
+      <p class="muted" style="margin:0">아래를 확인하고, 필요하면 원고를 고친 뒤 게시하세요.</p>
+      ${hits.slice(0, 12).map(h => `<div class="hit"><b>${esc(h.value)}</b> <span>${esc(h.kind)} · …${esc(h.context)}…</span></div>`).join('')}
+      <label style="display:flex;gap:8px;align-items:center;margin-top:14px;font-weight:600">
+        <input type="checkbox" id="ackPrivacy" ${draft.privacyAcknowledged ? 'checked' : ''} /> 확인했습니다. 이대로 게시해도 괜찮습니다.
+      </label>
+    </div>`;
+}
+const esc = (s) => String(s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+
+function renderKeyPoints(points) {
+  const list = $('#kpList');
+  list.innerHTML = '';
+  (points.length ? points : ['', '', '']).forEach(p => addKp(p));
+}
+function addKp(value = '') {
+  const row = document.createElement('div');
+  row.className = 'kp';
+  row.innerHTML = '<input type="text" placeholder="핵심 포인트 한 문장" /><button type="button">✕</button>';
+  row.querySelector('input').value = value;
+  row.querySelector('button').onclick = () => row.remove();
+  $('#kpList').appendChild(row);
+}
+$('#btnAddKp').onclick = () => addKp();
+
+function collect() {
+  return {
+    date: $('#f_date').value,
+    title: $('#f_title').value,
+    preacher: $('#f_preacher').value,
+    scriptureRef: $('#f_ref').value,
+    scriptureUrl: $('#f_url').value,
+    summary: $('#f_summary').value,
+    manuscript: $('#f_manuscript').value,
+    keyPoints: [...document.querySelectorAll('#kpList input')].map(i => i.value.trim()).filter(Boolean),
+    pptAccess: document.querySelector('input[name=ppt]:checked')?.value || 'view',
+    privacyAcknowledged: $('#ackPrivacy')?.checked || false,
+  };
+}
+const save = async () => {
+  const r = await api(`/api/drafts/${draft.id}`, {
+    method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(collect()),
+  });
+  return r;
+};
+
+$('#btnSave').onclick = async () => {
+  try { await save(); toast('임시저장했습니다. 아직 공개되지 않았습니다.'); }
+  catch (e) { toast(e.message, 5000); }
+};
+
+$('#btnPublish').onclick = async () => {
+  if (!confirm('게시하면 누구나 볼 수 있습니다. 계속할까요?')) return;
+  $('#btnPublish').disabled = true;
+  try {
+    await save();
+    const r = await api(`/api/drafts/${draft.id}/publish`, { method: 'POST' });
+    if (r.git?.ok) toast('게시했습니다! 2분쯤 뒤 웹에 반영됩니다.', 6000);
+    else toast(`저장은 됐습니다. ${r.git?.error || ''}`, 8000);
+    setTimeout(() => location.reload(), 2500);
+  } catch (e) {
+    toast(e.message, 6000);
+    $('#btnPublish').disabled = false;
+  }
+};
+
+$('#btnCancel').onclick = () => location.reload();
+
+$('#btnCopyPrompt').onclick = async () => {
+  await save();
+  const { prompt } = await api(`/api/drafts/${draft.id}/prompt`);
+  await navigator.clipboard.writeText(prompt);
+  toast('복사했습니다. Claude에 붙여넣으세요.');
+};
+
+$('#btnApplyAi').onclick = async () => {
+  try {
+    const d = await api(`/api/drafts/${draft.id}/ai`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text: $('#aiPaste').value }),
+    });
+    $('#f_title').value = d.title || '';
+    $('#f_ref').value = d.scriptureRef || '';
+    $('#f_url').value = d.scriptureUrl || '';
+    $('#f_summary').value = d.summary || '';
+    renderKeyPoints(d.keyPoints || []);
+    $('#aiPaste').value = '';
+    toast('반영했습니다. 내용을 확인해 주세요.');
+  } catch (e) { toast(e.message, 5000); }
+};
+
+// ── 시작할 때: 임시저장 목록 + 환경 점검 ──────────────
+(async () => {
+  try {
+    const { libreoffice } = await api('/api/health');
+    if (!libreoffice) $('#envNote').textContent =
+      '※ LibreOffice가 없어 PPT 변환이 안 됩니다. 터미널에서: brew install --cask libreoffice';
+  } catch {}
+  try {
+    const drafts = await api('/api/drafts');
+    if (!drafts.length) return;
+    $('#draftsCard').classList.remove('hidden');
+    $('#draftList').innerHTML = '';
+    drafts.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'draftitem';
+      row.innerHTML = `<span>${esc(d.date || '')} ${esc(d.title || '(제목 없음)')}</span>
+                       <button class="btn ghost small">이어하기</button>
+                       <button class="btn ghost small">삭제</button>`;
+      const [go, del] = row.querySelectorAll('button');
+      go.onclick = async () => openReview(await api(`/api/drafts/${d.id}`));
+      del.onclick = async () => {
+        if (!confirm('이 초안을 지울까요?')) return;
+        await api(`/api/drafts/${d.id}`, { method: 'DELETE' });
+        location.reload();
+      };
+      $('#draftList').appendChild(row);
+    });
+  } catch {}
+})();
+</script>
+</body>
+</html>

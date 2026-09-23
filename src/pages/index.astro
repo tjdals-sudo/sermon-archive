@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+import { sermons, years, formatDate } from '../lib/sermons.mjs';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// 설교자가 거의 한 분이면 카드마다 이름을 반복하지 않습니다
+const counts = {};
+for (const s of sermons) if (s.preacher) counts[s.preacher] = (counts[s.preacher] ?? 0) + 1;
+const mainPreacher = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
+
+// 설교가 실제로 있는 달만 버튼으로 보여 줍니다
+const monthsByYear = {};
+for (const s of sermons) {
+  const [y, m] = s.date.split('-');
+  (monthsByYear[y] ??= new Set()).add(String(Number(m)));
+}
+---
+<Base>
+  {sermons.length === 0 ? (
+    <p class="empty">아직 등록된 설교가 없습니다.</p>
+  ) : (
+    <>
+      {years.length > 1 && (
+        <div class="filters" id="yearFilter">
+          {years.map((y, i) => (
+            <button class="chip" data-year={y} aria-pressed={i === 0 ? 'true' : 'false'}>{y}년</button>
+          ))}
+        </div>
+      )}
+      <div class="filters" id="monthFilter">
+        <button class="chip" data-month="all" aria-pressed="true">전체</button>
+        {[...(monthsByYear[years[0]] ?? [])]
+          .sort((a, b) => Number(a) - Number(b))
+          .map((m) => <button class="chip" data-month={m} data-of={years[0]}>{m}월</button>)}
+      </div>
+
+      <ul class="card-list" id="list">
+        {sermons.map((s) => {
+          const d = formatDate(s.date);
+          return (
+            <li data-year={d.y} data-month={d.m}>
+              <a class="card" href={`${base}/sermons/${s.slug}/`}>
+                <div class="card-body">
+                  <div class="card-date">{d.short} {d.full.includes('(일)') ? '주일' : ''}</div>
+                  <h2 class="card-title">{s.title}</h2>
+                  <div class="card-meta">
+                    {s.scriptureRef}
+                    {s.preacher && s.preacher !== mainPreacher && <><span class="dot">·</span>{s.preacher}</>}
+                  </div>
+                </div>
+                {s.files?.thumb && (
+                  <img class="card-thumb" src={base + s.files.thumb} alt="" loading="lazy" decoding="async" />
+                )}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+      <p class="empty" id="noResult" hidden>이 달에는 등록된 설교가 없습니다.</p>
+      {mainPreacher && <p class="note" style="text-align:center;padding-bottom:40px">설교 · {mainPreacher}</p>}
+    </>
+  )}
+</Base>
+
+<script is:inline>
+  const items = [...document.querySelectorAll('#list > li')];
+  if (items.length) {
+    const yearBtns = [...document.querySelectorAll('#yearFilter .chip')];
+    const monthBtns = [...document.querySelectorAll('#monthFilter .chip')];
+    let year = yearBtns[0]?.dataset.year ?? items[0].dataset.year;
+    let month = 'all';
+
+    function apply() {
+      let shown = 0;
+      for (const li of items) {
+        const ok = li.dataset.year === year && (month === 'all' || li.dataset.month === month);
+        li.hidden = !ok;
+        if (ok) shown++;
+      }
+      document.getElementById('noResult').hidden = shown !== 0;
+    }
+    function select(btns, attr, value) {
+      for (const b of btns) b.setAttribute('aria-pressed', String(b.dataset[attr] === value));
+    }
+    yearBtns.forEach((b) => b.addEventListener('click', () => {
+      year = b.dataset.year; select(yearBtns, 'year', year); month = 'all';
+      select(monthBtns, 'month', 'all'); apply();
+    }));
+    monthBtns.forEach((b) => b.addEventListener('click', () => {
+      month = b.dataset.month; select(monthBtns, 'month', month); apply();
+    }));
+    apply();
+  }
+</script>

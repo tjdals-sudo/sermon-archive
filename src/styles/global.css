@@ -1,0 +1,213 @@
+/* ─────────────────────────────────────────────────────────────
+   설교 아카이브 공통 스타일
+   색은 전부 아래 변수로만 지정합니다. 색을 바꾸려면 여기만 고치세요.
+   ───────────────────────────────────────────────────────────── */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css');
+
+:root {
+  color-scheme: light;
+  --bg:        #faf7f2;   /* 따뜻한 미색 배경 */
+  --surface:   #ffffff;
+  --surface-2: #f2ece2;
+  --text:      #2b2622;   /* 완전 검정 대신 부드러운 먹색 */
+  --text-soft: #6b6157;
+  --line:      #e4dbcd;
+  --accent:    #8a5a35;   /* 차분한 갈색 */
+  --accent-bg: #f4ebe1;
+  --warn:      #a1442f;
+  --warn-bg:   #fbeeea;
+  --radius: 14px;
+  --fs: 1;                /* 글자 크기 배율 (버튼으로 조절) */
+  --maxw: 720px;
+}
+:root[data-fs='2'] { --fs: 1.15; }
+:root[data-fs='3'] { --fs: 1.32; }
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg:        #1b1917;
+  --surface:   #242019;
+  --surface-2: #2e2922;
+  --text:      #ede7de;
+  --text-soft: #a89e91;
+  --line:      #3a342b;
+  --accent:    #d9a273;
+  --accent-bg: #332a22;
+  --warn:      #e8917a;
+  --warn-bg:   #3a2620;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg:#1b1917; --surface:#242019; --surface-2:#2e2922;
+    --text:#ede7de; --text-soft:#a89e91; --line:#3a342b;
+    --accent:#d9a273; --accent-bg:#332a22; --warn:#e8917a; --warn-bg:#3a2620;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+               'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  font-size: calc(17px * var(--fs));
+  line-height: 1.75;
+  word-break: keep-all;       /* 한글 단어 중간에서 안 끊기게 */
+  overflow-wrap: break-word;
+}
+a { color: inherit; }
+img { max-width: 100%; height: auto; }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding-inline: 18px; }
+
+/* ── 헤더 ───────────────────────────────────────────── */
+.site-header {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.site-header .wrap {
+  display: flex; align-items: center; gap: 10px;
+  padding-block: 12px; min-height: 56px;
+}
+.site-title {
+  font-weight: 700; font-size: calc(1.02em); letter-spacing: -.02em;
+  text-decoration: none; margin-right: auto;
+}
+.iconbtn {
+  border: 1px solid var(--line); background: var(--surface);
+  color: var(--text); border-radius: 999px;
+  min-width: 44px; height: 44px; padding: 0 14px;
+  font: inherit; font-size: .88em; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.iconbtn:active { background: var(--surface-2); }
+
+/* ── 목록 ───────────────────────────────────────────── */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 16px; }
+.chip {
+  border: 1px solid var(--line); background: var(--surface);
+  color: var(--text-soft); border-radius: 999px;
+  padding: 9px 15px; font: inherit; font-size: .9em; cursor: pointer;
+  min-height: 40px;
+}
+.chip[aria-pressed='true'] {
+  background: var(--accent-bg); border-color: var(--accent);
+  color: var(--accent); font-weight: 600;
+}
+.card-list { display: grid; gap: 12px; padding: 0 0 48px; list-style: none; margin: 0; }
+.card {
+  display: flex; gap: 14px; align-items: center; text-decoration: none;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 15px 16px;
+}
+.card-body { min-width: 0; flex: 1; }
+.card-thumb {
+  flex: none; width: 92px; aspect-ratio: 16/10;
+  object-fit: cover; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--surface-2);
+}
+.card:active { background: var(--surface-2); }
+.card-date { font-size: .86em; color: var(--accent); font-weight: 600; }
+.card-title {
+  margin: 3px 0 7px; font-size: 1.14em; font-weight: 700;
+  letter-spacing: -.02em; line-height: 1.4;
+}
+.card-meta { font-size: .9em; color: var(--text-soft); }
+.card-meta .dot { opacity: .5; margin: 0 6px; }
+
+/* ── 상세 ───────────────────────────────────────────── */
+.back { display: inline-block; margin: 18px 0 8px; color: var(--text-soft); font-size: .92em; text-decoration: none; }
+.sermon-head { padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.sermon-date { color: var(--accent); font-weight: 600; font-size: .92em; }
+h1 { font-size: 1.7em; line-height: 1.35; letter-spacing: -.03em; margin: 8px 0 12px; }
+.scripture {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-bg); color: var(--accent);
+  border-radius: 999px; padding: 8px 15px; font-size: .94em;
+  font-weight: 600; text-decoration: none; min-height: 40px;
+}
+.preacher { color: var(--text-soft); font-size: .95em; margin-top: 10px; }
+
+section.block { padding: 26px 0; border-bottom: 1px solid var(--line); }
+section.block:last-of-type { border-bottom: 0; }
+.block h2 { font-size: 1.12em; margin: 0 0 14px; letter-spacing: -.02em; }
+.block h2::before {
+  content: ''; display: inline-block; width: 3px; height: .95em;
+  background: var(--accent); border-radius: 2px;
+  margin-right: 8px; vertical-align: -.1em;
+}
+.summary { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin: 0; }
+.points { margin: 0; padding: 0; list-style: none; counter-reset: p; display: grid; gap: 10px; }
+.points li { counter-increment: p; display: flex; gap: 12px; align-items: baseline; }
+.points li::before {
+  content: counter(p); flex: none;
+  width: 26px; height: 26px; border-radius: 999px;
+  background: var(--accent-bg); color: var(--accent);
+  font-size: .8em; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.note { color: var(--text-soft); font-size: .86em; margin-top: 10px; }
+
+/* 설교 자료: 한 장씩 쭉 스크롤하며 봅니다 */
+.slides { display: grid; gap: 10px; }
+.slide { margin: 0; position: relative; }
+.slide img {
+  display: block; width: 100%; height: auto;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+}
+.slide figcaption {
+  position: absolute; right: 10px; bottom: 10px;
+  background: rgba(0, 0, 0, .55); color: #fff;
+  font-size: .72em; padding: 2px 9px; border-radius: 999px;
+  letter-spacing: .02em;
+}
+h2 .count { color: var(--text-soft); font-weight: 400; font-size: .85em; margin-left: 4px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 46px; padding: 0 18px; border-radius: 999px;
+  background: var(--accent); color: #fff; text-decoration: none;
+  font-weight: 600; font-size: .95em; border: 0; cursor: pointer;
+}
+.btn.ghost { background: var(--surface); color: var(--text); border: 1px solid var(--line); }
+
+.manuscript { white-space: pre-wrap; line-height: 1.95; }
+details.ms > summary {
+  cursor: pointer; list-style: none; padding: 14px 0;
+  font-weight: 600; color: var(--accent);
+}
+details.ms > summary::-webkit-details-marker { display: none; }
+details.ms > summary::after { content: ' ▾'; }
+details.ms[open] > summary::after { content: ' ▴'; }
+
+footer.site-footer {
+  border-top: 1px solid var(--line); margin-top: 40px;
+  padding: 26px 0 60px; color: var(--text-soft); font-size: .85em; text-align: center;
+}
+.empty { text-align: center; color: var(--text-soft); padding: 60px 0; }
+
+/* 이전·다음 설교 */
+.nearby { display: grid; gap: 10px; padding: 26px 0 0; }
+.nearby-item {
+  display: flex; flex-direction: column; gap: 3px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 14px 16px; text-decoration: none;
+}
+.nearby-item span { font-size: .82em; color: var(--accent); font-weight: 600; }
+.nearby-item b { font-weight: 600; font-size: .98em; line-height: 1.4; }
+.nearby-item.next { text-align: right; }
+
+/* 맨 위로 */
+.to-top {
+  position: fixed; right: 16px; bottom: 22px; z-index: 30;
+  width: 48px; height: 48px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+  font-size: 1.2em; line-height: 1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

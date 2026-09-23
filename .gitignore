@@ -1,0 +1,10 @@
+# 검토 전 원고 — 절대 인터넷에 올라가면 안 됩니다
+.drafts/
+
+node_modules/
+dist/
+.astro/
+.DS_Store
+*.log
+.manuscripts/
+.summaries/

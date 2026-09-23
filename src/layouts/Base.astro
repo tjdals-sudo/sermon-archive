@@ -1,0 +1,93 @@
+---
+import '../styles/global.css';
+import { site } from '../../site.config.mjs';
+
+const {
+  title,
+  description = site.description,
+  ogImage,
+  ogType = 'website',
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pageTitle = title ? `${title} · ${site.churchName}` : `${site.churchName} 설교 아카이브`;
+const abs = (p) => (p ? new URL(p.startsWith('/') ? base + p : p, site.url).href : null);
+const ogImageUrl = abs(ogImage) ?? abs(site.defaultOgImage);
+const canonical = new URL(Astro.url.pathname, site.url).href;
+---
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- 카카오톡·페이스북 공유 미리보기 -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={site.churchName} />
+    <meta property="og:title" content={title ?? site.churchName} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- 화면 깜빡임 방지: 저장된 테마·글자크기를 그리기 전에 적용 -->
+    <script is:inline>
+      try {
+        const t = localStorage.getItem('theme');
+        if (t) document.documentElement.dataset.theme = t;
+        const f = localStorage.getItem('fs');
+        if (f) document.documentElement.dataset.fs = f;
+      } catch (e) {}
+    </script>
+  </head>
+
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="site-title" href={base + '/'}>{site.shortName}</a>
+        <button class="iconbtn" id="fsBtn" aria-label="글자 크기 조절">가</button>
+        <button class="iconbtn" id="themeBtn" aria-label="밝게/어둡게 전환">🌙</button>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      {site.churchName}<br />
+      설교 원고의 저작권은 설교자에게 있습니다.
+    </footer>
+
+    <script is:inline>
+      // 글자 크기: 보통 → 크게 → 아주 크게 → 보통
+      const root = document.documentElement;
+      document.getElementById('fsBtn').addEventListener('click', () => {
+        const now = root.dataset.fs || '1';
+        const next = now === '1' ? '2' : now === '2' ? '3' : '1';
+        root.dataset.fs = next;
+        try { localStorage.setItem('fs', next); } catch (e) {}
+      });
+      // 밝게/어둡게
+      const themeBtn = document.getElementById('themeBtn');
+      const paint = () => {
+        const dark = root.dataset.theme
+          ? root.dataset.theme === 'dark'
+          : matchMedia('(prefers-color-scheme: dark)').matches;
+        themeBtn.textContent = dark ? '☀️' : '🌙';
+      };
+      themeBtn.addEventListener('click', () => {
+        const dark = root.dataset.theme
+          ? root.dataset.theme === 'dark'
+          : matchMedia('(prefers-color-scheme: dark)').matches;
+        root.dataset.theme = dark ? 'light' : 'dark';
+        try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
+        paint();
+      });
+      paint();
+    </script>
+  </body>
+</html>
