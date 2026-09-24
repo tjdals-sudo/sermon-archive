@@ -7,7 +7,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const latest = sermons[0];
 const d = latest ? formatDate(latest.date) : null;
-const monthCount = Object.keys(months).length;
+
+// 말씀 띠부씰이 있는 달 (오래된 순 — 화면에서는 JS가 이번 달 것을 고릅니다)
+const stickers = Object.entries(months)
+  .filter(([, v]) => v.verse?.image)
+  .sort((a, b) => a[0].localeCompare(b[0]))
+  .map(([key, v]) => ({ key, month: Number(key.slice(5, 7)), ...v.verse }));
 ---
 <Base>
   <section class="hero">
@@ -16,11 +21,26 @@ const monthCount = Object.keys(months).length;
     <p class="hero-note">지난 주일 말씀을 언제든 다시 볼 수 있습니다.</p>
   </section>
 
+  {stickers.length > 0 && (
+    <section class="sticker-now" id="stickerNow" hidden>
+      {stickers.map((s) => (
+        <a class="sticker-card" href={`${base}/verses/#m${s.month}`} data-key={s.key} hidden>
+          <img data-src={base + s.image} alt={`${s.month}월 말씀 띠부씰`} decoding="async" />
+          <span class="sticker-text">
+            <small>이번 달 말씀 띠부씰</small>
+            <b>{s.month}월 · {s.ref}</b>
+          </span>
+          <span class="menu-go" aria-hidden="true">›</span>
+        </a>
+      ))}
+    </section>
+  )}
+
   <nav class="menu">
     <a class="menu-item" href={base + '/sermons/'}>
       <span class="menu-icon" aria-hidden="true">📖</span>
       <span class="menu-text">
-        <b>설교 보기</b>
+        <b>지난 설교 보기</b>
         <small>{sermons.length}편 · 날짜·주제별로 찾기</small>
       </span>
       <span class="menu-go" aria-hidden="true">›</span>
@@ -28,8 +48,8 @@ const monthCount = Object.keys(months).length;
     <a class="menu-item" href={base + '/verses/'}>
       <span class="menu-icon" aria-hidden="true">✍️</span>
       <span class="menu-text">
-        <b>월별 암송 말씀</b>
-        <small>이 달에 외울 말씀</small>
+        <b>말씀 띠부씰</b>
+        <small>달마다 함께 외우는 말씀</small>
       </span>
       <span class="menu-go" aria-hidden="true">›</span>
     </a>
@@ -37,7 +57,7 @@ const monthCount = Object.keys(months).length;
       <span class="menu-icon" aria-hidden="true">🗓️</span>
       <span class="menu-text">
         <b>월별 설교 주제</b>
-        <small>{monthCount}개월 · 한 달에 하나씩</small>
+        <small>한 달에 하나씩</small>
       </span>
       <span class="menu-go" aria-hidden="true">›</span>
     </a>
@@ -59,3 +79,28 @@ const monthCount = Object.keys(months).length;
     </section>
   )}
 </Base>
+
+<script is:inline>
+  // 오늘 날짜에 맞는 말씀 띠부씰을 고릅니다.
+  // 사이트를 다시 만들지 않아도 달이 바뀌면 알아서 바뀝니다.
+  (() => {
+    const box = document.getElementById('stickerNow');
+    if (!box) return;
+    const cards = [...box.querySelectorAll('.sticker-card')];
+    if (!cards.length) return;
+
+    const now = new Date();
+    const key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    // 이번 달 것이 있으면 그것, 없으면 지나간 달 중 가장 최근 것
+    let pick = cards.find((c) => c.dataset.key === key);
+    if (!pick) {
+      const past = cards.filter((c) => c.dataset.key <= key);
+      pick = past.length ? past[past.length - 1] : cards[cards.length - 1];
+    }
+    const img = pick.querySelector('img');
+    img.src = img.dataset.src;          // 고른 것만 이미지를 불러옵니다
+    pick.hidden = false;
+    box.hidden = false;
+  })();
+</script>

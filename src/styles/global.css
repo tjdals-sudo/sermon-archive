@@ -46,6 +46,8 @@
 }
 
 * { box-sizing: border-box; }
+/* hidden 속성이 display 지정보다 항상 우선하도록 */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
@@ -350,3 +352,19 @@ footer.site-footer {
   border-radius: var(--radius); padding: 16px; font-size: .9em; line-height: 1.7;
 }
 .notice code { background: rgba(0,0,0,.08); padding: 1px 5px; border-radius: 4px; font-size: .92em; }
+
+/* 홈 — 이번 달 말씀 띠부씰 */
+.sticker-now { margin: 0 0 16px; }
+.sticker-card {
+  display: flex; align-items: center; gap: 14px; text-decoration: none;
+  background: var(--accent-bg); border: 1px solid var(--accent);
+  border-radius: var(--radius); padding: 12px 16px 12px 12px;
+}
+.sticker-card:active { filter: brightness(.97); }
+.sticker-card img {
+  flex: none; width: 74px; height: auto; border-radius: 8px;
+}
+.sticker-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.sticker-text small { color: var(--accent); font-size: .8em; font-weight: 700; }
+.sticker-text b { font-size: 1.02em; letter-spacing: -.02em; color: var(--text); }
+.sticker-card .menu-go { color: var(--accent); }

@@ -12,13 +12,13 @@ const rows = Object.entries(months)
 const thisMonth = new Date().toISOString().slice(0, 7);
 ---
 <Base
-  title="월별 암송 말씀"
-  description="소년부가 달마다 함께 외우는 말씀입니다."
+  title="말씀 띠부씰"
+  description="소년부가 달마다 함께 외우는 말씀 띠부씰입니다."
   ogImage={rows[0]?.verse?.image}
 >
   <a class="back-btn" href={base + '/'}>← 홈으로 돌아가기</a>
-  <h1 class="page-title">월별 암송 말씀</h1>
-  <p class="page-note">달마다 소년부가 함께 외우는 말씀입니다. 말씀 카드를 눌러 크게 볼 수 있습니다.</p>
+  <h1 class="page-title">말씀 띠부씰</h1>
+  <p class="page-note">달마다 함께 외우는 말씀입니다. 띠부씰을 누르면 크게 볼 수 있습니다.</p>
 
   {rows.map((r) => (
     <section class="verse-block" id={`m${r.month}`}>
@@ -30,7 +30,7 @@ const thisMonth = new Date().toISOString().slice(0, 7);
 
       {r.verse.image && (
         <a class="verse-card" href={base + r.verse.image} target="_blank" rel="noopener">
-          <img src={base + r.verse.image} alt={`${r.month}월 암송 말씀 카드 — ${r.verse.text}`}
+          <img src={base + r.verse.image} alt={`${r.month}월 말씀 띠부씰 — ${r.verse.text}`}
                loading="lazy" decoding="async" />
         </a>
       )}
