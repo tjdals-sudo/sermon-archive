@@ -331,9 +331,10 @@ footer.site-footer {
 }
 .month-date { flex: none; width: 44px; color: var(--accent); font-size: .86em; font-weight: 600; }
 .month-title { font-size: .96em; line-height: 1.45; }
-.verse-card { display: block; margin: 16px 0 14px; text-align: center; }
+.verse-card { display: block; margin: 16px auto 14px; text-align: center; }
 .verse-card img {
-  max-width: 100%; width: 260px; height: auto;
+  display: block; margin: 0 auto;
+  width: min(230px, 66%); height: auto;
   border-radius: 12px;
 }
 .verse-text {
