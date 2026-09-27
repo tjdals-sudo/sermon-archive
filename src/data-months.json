@@ -88,5 +88,15 @@
       "url": "https://www.bible.com/ko/bible/88/1JN.4",
       "image": "/files/verses/2026-09.png"
     }
+  },
+  "2026-10": {
+    "theme": "선교",
+    "detail": "바울이 만난 사람들",
+    "verse": {
+      "ref": "데살로니가전서 5장 18절",
+      "text": "범사에 감사하라 이것이 그리스도 예수 안에서 너희를 향하신 하나님의 뜻이니라",
+      "url": "https://www.bible.com/ko/bible/88/1TH.5",
+      "image": "/files/verses/2026-10.png"
+    }
   }
 }

@@ -11,7 +11,9 @@ const rows = Object.entries(months)
     month: Number(key.slice(5, 7)),
     ...v,
     list: sermons.filter((s) => s.date.startsWith(key)),
-  }));
+  }))
+  // 주제를 아직 안 정했고 설교도 없는 달은 건너뜁니다
+  .filter((r) => r.theme || r.list.length);
 ---
 <Base title="월별 설교 주제" description="한 달에 하나씩, 그달에 나눈 말씀의 주제입니다.">
   <a class="back-btn" href={base + '/'}>← 홈으로 돌아가기</a>
