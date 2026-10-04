@@ -13,6 +13,26 @@ const stickers = Object.entries(months)
   .filter(([, v]) => v.verse?.image)
   .sort((a, b) => a[0].localeCompare(b[0]))
   .map(([key, v]) => ({ key, month: Number(key.slice(5, 7)), ...v.verse }));
+
+// 이번 주 말씀 한 줄: 최근 설교 핵심포인트의 마지막 문장
+const oneLine = latest?.keyPoints?.at(-1);
+
+// 올해 설교 달력: 1~12월의 모든 주일을 점으로, 설교가 있는 주일은 채운 점
+const byDate = new Map();
+for (const s of sermons) if (!byDate.has(s.date)) byDate.set(s.date, s);
+const yearCount = sermons.filter((s) => s.date.startsWith(site.year)).length;
+const pad = (n) => String(n).padStart(2, '0');
+const calendar = Array.from({ length: 12 }, (_, i) => {
+  const sundays = [];
+  const day = new Date(Number(site.year), i, 1);
+  day.setDate(1 + ((7 - day.getDay()) % 7));      // 그 달의 첫 주일
+  while (day.getMonth() === i) {
+    const iso = `${site.year}-${pad(i + 1)}-${pad(day.getDate())}`;
+    sundays.push({ iso, d: day.getDate(), sermon: byDate.get(iso) });
+    day.setDate(day.getDate() + 7);
+  }
+  return { month: i + 1, sundays };
+});
 ---
 <Base>
   <section class="hero">
@@ -76,8 +96,36 @@ const stickers = Object.entries(months)
           <img class="card-thumb" src={base + latest.files.thumb} alt="" loading="lazy" />
         )}
       </a>
+      {oneLine && (
+        <a class="one-line" href={`${base}/sermons/${latest.slug}/`}>
+          <small>이번 주 말씀 한 줄</small>
+          <blockquote>{oneLine}</blockquote>
+        </a>
+      )}
     </section>
   )}
+
+  <section class="year-cal">
+    <h2 class="latest-label">올해 설교 달력 <span class="year-count">{site.year}년 {yearCount}편</span></h2>
+    <div class="cal-box">
+      {calendar.map((m) => (
+        <div class="cal-row">
+          <span class="cal-month">{m.month}월</span>
+          <span class="cal-dots">
+            {m.sundays.map((w) =>
+              w.sermon ? (
+                <a class="cal-dot on" href={`${base}/sermons/${w.sermon.slug}/`} data-d={w.iso}
+                   title={w.sermon.title} aria-label={`${m.month}월 ${w.d}일 ${w.sermon.title}`}>{w.d}</a>
+              ) : (
+                <span class="cal-dot" data-d={w.iso} aria-hidden="true">{w.d}</span>
+              )
+            )}
+          </span>
+        </div>
+      ))}
+    </div>
+    <p class="cal-legend"><span class="cal-dot on" aria-hidden="true"></span> 설교 있음 · 숫자는 주일 날짜</p>
+  </section>
 </Base>
 
 <script is:inline>
@@ -102,5 +150,15 @@ const stickers = Object.entries(months)
     img.src = img.dataset.src;          // 고른 것만 이미지를 불러옵니다
     pick.hidden = false;
     box.hidden = false;
+  })();
+
+  // 설교 달력: 아직 오지 않은 주일은 흐리게
+  (() => {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    document.querySelectorAll('.cal-dot[data-d]').forEach((el) => {
+      if (el.dataset.d > today) el.classList.add('future');
+      if (el.dataset.d === today) el.classList.add('today');
+    });
   })();
 </script>
