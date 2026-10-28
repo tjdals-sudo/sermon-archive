@@ -22,6 +22,14 @@ const canonical = new URL(Astro.url.pathname, site.url).href;
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+
+    <!-- 홈 화면 아이콘 -->
+    <link rel="icon" type="image/png" href={`${base}/icon-192.png`} />
+    <link rel="apple-touch-icon" href={`${base}/apple-touch-icon.png`} />
+    <link rel="manifest" href={`${base}/manifest.webmanifest`} />
+    <meta name="theme-color" content="#16264b" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content={site.shortName} />
     <link rel="canonical" href={canonical} />
 
     <!-- 카카오톡·페이스북 공유 미리보기 -->
