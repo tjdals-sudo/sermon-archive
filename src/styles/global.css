@@ -286,7 +286,7 @@ footer.site-footer {
   content: ''; position: absolute; right: -24px; top: 36px;
   width: min(300px, 44vw); height: min(400px, 60vw);
   border: 2px solid var(--gold); border-radius: 999px 999px 0 0;
-  opacity: .8;
+  opacity: .6;
 }
 .hero::after {
   content: ''; position: absolute; right: calc(-24px + min(300px, 44vw) / 2 - 7px);
