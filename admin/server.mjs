@@ -193,13 +193,24 @@ async function pushToGithub(message) {
   } catch {
     return { ok: false, step: 'remote', error: '깃헙 저장소가 아직 연결되지 않았습니다. 저장은 끝났고, 연결 후 올라갑니다.' };
   }
-  try {
-    const branch = (await g(['rev-parse', '--abbrev-ref', 'HEAD'])).stdout.trim();
-    await g(['push', 'origin', branch]);
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, step: 'push', error: e.stderr || e.message };
+  // 다른 폴더에서 디자인 등을 먼저 올렸을 수 있으니, 최신 내용을 받아 그 위에 얹은 뒤 올립니다
+  const branch = (await g(['rev-parse', '--abbrev-ref', 'HEAD'])).stdout.trim();
+  let lastError = '';
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await g(['pull', '--rebase', 'origin', branch]);
+    } catch (e) {
+      await g(['rebase', '--abort']).catch(() => {});
+      return { ok: false, step: 'pull', error: e.stderr || e.message };
+    }
+    try {
+      await g(['push', 'origin', branch]);
+      return { ok: true };
+    } catch (e) {
+      lastError = e.stderr || e.message;
+    }
   }
+  return { ok: false, step: 'push', error: lastError };
 }
 
 // ── 3) 서버 ────────────────────────────────────────────
