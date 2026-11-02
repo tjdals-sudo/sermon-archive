@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import { sermons, formatDate } from '../lib/sermons.mjs';
 import { site } from '../../site.config.mjs';
 import months from '../data-months.json';
+import Icon from '../components/Icon.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const latest = sermons[0];
@@ -36,9 +37,8 @@ const calendar = Array.from({ length: 12 }, (_, i) => {
 ---
 <Base>
   <section class="hero">
-    <p class="hero-sub">{site.churchName}</p>
     <h1 class="hero-title">{site.year}년<br />설교 아카이브</h1>
-    <p class="hero-note">지난 주일 말씀을 언제든 다시 볼 수 있습니다.</p>
+    <p class="hero-note">{site.churchName}의 지난 주일 말씀을<br />언제든 다시 볼 수 있습니다.</p>
   </section>
 
   {stickers.length > 0 && (
@@ -47,10 +47,10 @@ const calendar = Array.from({ length: 12 }, (_, i) => {
         <a class="sticker-card" href={`${base}/verses/#m${s.month}`} data-key={s.key} hidden>
           <img data-src={base + s.image} alt={`${s.month}월 말씀 띠부씰`} decoding="async" />
           <span class="sticker-text">
-            <small>이번 달 말씀 띠부씰</small>
-            <b>{s.month}월 · {s.ref}</b>
+            <small>이번 달 말씀 띠부씰 · {s.month}월</small>
+            <b>{s.ref}</b>
           </span>
-          <span class="menu-go" aria-hidden="true">›</span>
+          <span class="menu-go"><Icon name="chevron" size="1em" /></span>
         </a>
       ))}
     </section>
@@ -58,28 +58,25 @@ const calendar = Array.from({ length: 12 }, (_, i) => {
 
   <nav class="menu">
     <a class="menu-item" href={base + '/sermons/'}>
-      <span class="menu-icon" aria-hidden="true">📖</span>
       <span class="menu-text">
         <b>지난 설교 보기</b>
         <small>{sermons.length}편 · 날짜·주제별로 찾기</small>
       </span>
-      <span class="menu-go" aria-hidden="true">›</span>
+      <span class="menu-go"><Icon name="chevron" size="1em" /></span>
     </a>
     <a class="menu-item" href={base + '/verses/'}>
-      <span class="menu-icon" aria-hidden="true">✍️</span>
       <span class="menu-text">
         <b>말씀 띠부씰</b>
         <small>달마다 함께 외우는 말씀</small>
       </span>
-      <span class="menu-go" aria-hidden="true">›</span>
+      <span class="menu-go"><Icon name="chevron" size="1em" /></span>
     </a>
     <a class="menu-item" href={base + '/themes/'}>
-      <span class="menu-icon" aria-hidden="true">🗓️</span>
       <span class="menu-text">
         <b>월별 설교 주제</b>
         <small>한 달에 하나씩</small>
       </span>
-      <span class="menu-go" aria-hidden="true">›</span>
+      <span class="menu-go"><Icon name="chevron" size="1em" /></span>
     </a>
   </nav>
 

@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import months from '../../data-months.json';
+import Icon from '../../components/Icon.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const rows = Object.entries(months)
@@ -16,7 +17,7 @@ const thisMonth = new Date().toISOString().slice(0, 7);
   description="소년부가 달마다 함께 외우는 말씀 띠부씰입니다."
   ogImage={rows[0]?.verse?.image}
 >
-  <a class="back-btn" href={base + '/'}>← 홈으로 돌아가기</a>
+  <a class="back-btn" href={base + '/'}><Icon name="left" /> 홈으로 돌아가기</a>
   <h1 class="page-title">말씀 띠부씰</h1>
 
   {rows.map((r) => (
@@ -37,10 +38,10 @@ const thisMonth = new Date().toISOString().slice(0, 7);
       <p class="verse-text">{r.verse.text}</p>
 
       {r.verse.url
-        ? <a class="scripture" href={r.verse.url} target="_blank" rel="noopener">📖 {r.verse.ref} 보기 ↗</a>
-        : <span class="scripture">📖 {r.verse.ref}</span>}
+        ? <a class="scripture" href={r.verse.url} target="_blank" rel="noopener"><Icon name="book" /> {r.verse.ref} 보기 <Icon name="external" size="0.95em" /></a>
+        : <span class="scripture"><Icon name="book" /> {r.verse.ref}</span>}
     </section>
   ))}
 
-  <a class="back-btn wide home" href={base + '/'}>🏠 홈으로 돌아가기</a>
+  <a class="back-btn wide home" href={base + '/'}><Icon name="home" /> 홈으로 돌아가기</a>
 </Base>

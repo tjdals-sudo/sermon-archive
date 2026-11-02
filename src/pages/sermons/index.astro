@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { sermons, years, formatDate } from '../../lib/sermons.mjs';
+import Icon from '../../components/Icon.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 // 설교자가 거의 한 분이면 카드마다 이름을 반복하지 않습니다
@@ -21,23 +22,29 @@ for (const s of sermons) {
 }
 ---
 <Base title="설교 보기">
-  <a class="back-btn" href={base + '/'}>← 홈으로 돌아가기</a>
+  <a class="back-btn" href={base + '/'}><Icon name="left" /> 홈으로 돌아가기</a>
   {sermons.length === 0 ? (
     <p class="empty">아직 등록된 설교가 없습니다.</p>
   ) : (
     <>
       <div class="search">
-        <span class="search-icon" aria-hidden="true">🔍</span>
+        <span class="search-icon"><Icon name="search" size="1.15em" /></span>
         <input
           type="search" id="q" autocomplete="off" enterkeyhint="search"
-          placeholder="제목·본문·내용 검색 (예: 기도, 요한복음, ㅂㅇ)"
+          placeholder="제목·본문·내용 검색 (예: 기도)"
           aria-label="설교 검색"
         />
-        <button type="button" id="qClear" aria-label="검색어 지우기" hidden>✕</button>
+        <button type="button" id="qClear" aria-label="검색어 지우기" hidden><Icon name="close" size="1em" /></button>
       </div>
       <p class="search-count" id="qCount" hidden></p>
 
-      <div id="browseFilters">
+      <details class="filter-box" id="browseFilters">
+        <summary>
+          <Icon name="filter" />
+          <span class="filter-box-title">월·주제로 골라 보기</span>
+          <span class="filter-now" id="filterNow">전체</span>
+          <Icon name="chevron" size="1em" />
+        </summary>
         {years.length > 1 && (
           <div class="filters" id="yearFilter">
             {years.map((y, i) => (
@@ -57,21 +64,31 @@ for (const s of sermons) {
           <button class="chip" data-tag="all" aria-pressed="true">전체</button>
           {topTags.map((t) => <button class="chip" data-tag={t}>{t}</button>)}
         </div>
-      </div>
+      </details>
 
       <ul class="card-list" id="list">
-        {sermons.map((s) => {
+        {sermons.map((s, i) => {
           const d = formatDate(s.date);
+          // 달이 바뀌는 자리에 'n월' 제목을 끼워 넣습니다 (최신순이라 위에서부터 11월, 10월 …)
+          const group = `${d.y}-${d.m}`;
+          const prev = sermons[i - 1];
+          const newGroup = !prev || formatDate(prev.date).m !== d.m || formatDate(prev.date).y !== d.y;
           const body = [s.summary, ...(s.keyPoints ?? [])].filter(Boolean).join(' ');
           const haystack = [s.title, s.scriptureRef, s.preacher, body, ...(s.tags ?? [])]
             .filter(Boolean).join(' ');
           return (
-            <li data-year={d.y} data-month={d.m} data-tags={(s.tags ?? []).join(',')}
+            <>
+            {newGroup && (
+              <li class="group-head" data-group={group}>
+                <h2>{d.m}월{years.length > 1 && <small> {d.y}</small>}</h2>
+              </li>
+            )}
+            <li class="item" data-group={group} data-year={d.y} data-month={d.m} data-tags={(s.tags ?? []).join(',')}
                 data-search={haystack} data-title={s.title} data-body={body}>
               <a class="card" href={`${base}/sermons/${s.slug}/`}>
                 <div class="card-body">
                   <div class="card-date">{d.short} {d.full.includes('(일)') ? '주일' : ''}</div>
-                  <h2 class="card-title">{s.title}</h2>
+                  <h3 class="card-title">{s.title}</h3>
                   <div class="card-meta">
                     {s.scriptureRef}
                     {s.preacher && s.preacher !== mainPreacher && <><span class="dot">·</span>{s.preacher}</>}
@@ -83,18 +100,20 @@ for (const s of sermons) {
                 )}
               </a>
             </li>
+            </>
           );
         })}
       </ul>
       <p class="empty" id="noResult" hidden>이 달에는 등록된 설교가 없습니다.</p>
       {mainPreacher && <p class="note" style="text-align:center">설교 · {mainPreacher}</p>}
-      <a class="back-btn wide home" href={base + '/'}>🏠 홈으로 돌아가기</a>
+      <a class="back-btn wide home" href={base + '/'}><Icon name="home" /> 홈으로 돌아가기</a>
     </>
   )}
 </Base>
 
 <script is:inline>
-  const items = [...document.querySelectorAll('#list > li')];
+  const items = [...document.querySelectorAll('#list > li.item')];
+  const heads = [...document.querySelectorAll('#list > li.group-head')];
   if (items.length) {
     const yearBtns = [...document.querySelectorAll('#yearFilter .chip')];
     const monthBtns = [...document.querySelectorAll('#monthFilter .chip')];
@@ -103,6 +122,7 @@ for (const s of sermons) {
     const countEl = document.getElementById('qCount');
     const browse = document.getElementById('browseFilters');
     const noResult = document.getElementById('noResult');
+    const filterNow = document.getElementById('filterNow');
 
     const tagBtns = [...document.querySelectorAll('#tagFilter .chip')];
     let year = yearBtns[0]?.dataset.year ?? items[0].dataset.year;
@@ -180,6 +200,15 @@ for (const s of sermons) {
           ? '이 달에는 등록된 설교가 없습니다.'
           : `'${tag}' 주제의 설교가 이 달에는 없습니다.`;
       }
+
+      // 보이는 설교가 없는 달은 'n월' 제목도 숨깁니다
+      for (const h of heads) {
+        h.hidden = !items.some((li) => !li.hidden && li.dataset.group === h.dataset.group);
+      }
+      // 접힌 상태에서도 지금 무엇을 골랐는지 보이게
+      const picked = [month === 'all' ? '' : `${month}월`, tag === 'all' ? '' : tag].filter(Boolean);
+      filterNow.textContent = picked.length ? picked.join(' · ') : '전체';
+      filterNow.classList.toggle('on', picked.length > 0);
     }
 
     function select(btns, attr, value) {
@@ -206,6 +235,7 @@ for (const s of sermons) {
     if (tagParam && tagBtns.some((b) => b.dataset.tag === tagParam)) {
       tag = tagParam;
       select(tagBtns, 'tag', tag);
+      browse.open = true;
     }
     run();
   }

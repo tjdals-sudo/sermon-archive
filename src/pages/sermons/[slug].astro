@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { sermons, formatDate } from '../../lib/sermons.mjs';
+import Icon from '../../components/Icon.astro';
 
 export function getStaticPaths() {
   return sermons.map((s, i) => ({
@@ -24,21 +25,21 @@ const canDownload = s.pptAccess === 'download' && pdf;
   ogImage={s.files?.thumb}
   ogType="article"
 >
-  <a class="back-btn" href={base + '/sermons/'}>← 설교 목록으로</a>
+  <a class="back-btn" href={base + '/sermons/'}><Icon name="left" /> 설교 목록으로</a>
 
   <header class="sermon-head">
     <div class="sermon-date">{d.full}</div>
     <h1>{s.title}</h1>
     {s.scriptureRef && (
       s.scriptureUrl
-        ? <a class="scripture" href={s.scriptureUrl} target="_blank" rel="noopener">📖 {s.scriptureRef} 보기 ↗</a>
-        : <span class="scripture">📖 {s.scriptureRef}</span>
+        ? <a class="scripture" href={s.scriptureUrl} target="_blank" rel="noopener"><Icon name="book" /> {s.scriptureRef} 보기 <Icon name="external" size="0.95em" /></a>
+        : <span class="scripture"><Icon name="book" /> {s.scriptureRef}</span>
     )}
     {s.preacher && <div class="preacher">{s.preacher}</div>}
     {s.tags?.length > 0 && (
       <div class="tags">
         {s.tags.map((t) => (
-          <a class="tag" href={`${base}/sermons/?tag=${encodeURIComponent(t)}`}># {t}</a>
+          <a class="tag" href={`${base}/sermons/?tag=${encodeURIComponent(t)}`}><span class="tag-hash" aria-hidden="true">#</span>{t}</a>
         ))}
       </div>
     )}
@@ -64,28 +65,32 @@ const canDownload = s.pptAccess === 'download' && pdf;
       <div class="slides">
         {slides.map((src, i) => (
           <figure class="slide">
-            <img src={src} alt={`${i + 1}번째 장`} loading={i < 2 ? 'eager' : 'lazy'} decoding="async" width="1200" />
+            <img src={src} alt={`${i + 1}번째 장`} loading={i < 2 ? 'eager' : 'lazy'} decoding="async" width="1200" height="675" />
             <figcaption>{i + 1} / {slides.length}</figcaption>
           </figure>
         ))}
       </div>
       {canDownload && (
-        <div class="btn-row"><a class="btn" href={pdf} download>PDF로 내려받기</a></div>
+        <div class="btn-row"><a class="btn" href={pdf} download><Icon name="download" /> PDF로 내려받기</a></div>
       )}
       {!canDownload && <p class="note">저작권 보호를 위해 화면 보기만 제공합니다.</p>}
     </section>
   )}
 
-  <nav class="nearby">
-    {older && (
+  <nav class="nearby" aria-label="이전·다음 설교">
+    {older ? (
       <a class="nearby-item" href={`${base}/sermons/${older.slug}/`}>
-        <span>← 이전 설교</span><b>{older.title}</b>
+        <span><Icon name="left" size="1em" /> 이전 설교 · {formatDate(older.date).short}</span><b>{older.title}</b>
       </a>
+    ) : (
+      <div class="nearby-item empty-side"><span>이전 설교</span><b>첫 설교입니다</b></div>
     )}
-    {newer && (
+    {newer ? (
       <a class="nearby-item next" href={`${base}/sermons/${newer.slug}/`}>
-        <span>다음 설교 →</span><b>{newer.title}</b>
+        <span>다음 설교 · {formatDate(newer.date).short} <Icon name="right" size="1em" /></span><b>{newer.title}</b>
       </a>
+    ) : (
+      <div class="nearby-item next empty-side"><span>다음 설교</span><b>가장 최근 설교입니다</b></div>
     )}
   </nav>
 
@@ -97,11 +102,11 @@ const canDownload = s.pptAccess === 'download' && pdf;
   </section>
 
   <div class="home-row">
-    <a class="back-btn wide" href={base + '/sermons/'}>← 설교 목록으로</a>
-    <a class="back-btn wide home" href={base + '/'}>🏠 홈으로 돌아가기</a>
+    <a class="back-btn wide" href={base + '/sermons/'}><Icon name="left" /> 설교 목록으로</a>
+    <a class="back-btn wide home" href={base + '/'}><Icon name="home" /> 홈으로 돌아가기</a>
   </div>
 
-  <button id="toTop" class="to-top" aria-label="맨 위로" hidden>↑</button>
+  <button id="toTop" class="to-top" aria-label="맨 위로" hidden><Icon name="up" size="1.3em" /></button>
   <script is:inline>
     const btn = document.getElementById('toTop');
     const onScroll = () => { btn.hidden = scrollY < 700; };
