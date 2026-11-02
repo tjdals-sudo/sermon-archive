@@ -71,8 +71,7 @@ for (const s of sermons) {
           const d = formatDate(s.date);
           // 달이 바뀌는 자리에 'n월' 제목을 끼워 넣습니다 (최신순이라 위에서부터 11월, 10월 …)
           const group = `${d.y}-${d.m}`;
-          const prev = sermons[i - 1];
-          const newGroup = !prev || formatDate(prev.date).m !== d.m || formatDate(prev.date).y !== d.y;
+          const newGroup = i === 0 || sermons[i - 1].date.slice(0, 7) !== s.date.slice(0, 7);
           const body = [s.summary, ...(s.keyPoints ?? [])].filter(Boolean).join(' ');
           const haystack = [s.title, s.scriptureRef, s.preacher, body, ...(s.tags ?? [])]
             .filter(Boolean).join(' ');
